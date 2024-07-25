@@ -1,6 +1,7 @@
 import React from "react";
 import s from "./ImageGallery.module.css";
 
+// ШАГ 2 формируем галлерею изображений для этого делаем функцию и мапим каждый итем в лишку
 const ImageGallery = ({ items }) => {
   return (
     <div className={s.galleryWrapper}>
