@@ -6,6 +6,8 @@ import "../index.css";
 import Loader from "./Loader/Loader";
 import { ErrorMessage } from "formik";
 import LoadMoreBtn from "./LoadMoreBtn/LoadMoreBtn";
+import ImageModal from "./ImageModal/ImageModal";
+import ImageCard from "./ImageGallery/ImageCard";
 
 // Импорт функции fetchImages взаимодействие с бэк эндом
 
@@ -15,6 +17,17 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false); //ШФГ5 загрузка
   const [isError, setIsError] = useState(false); //ШФГ6 ошибки
   const [page, setPage] = useState(1); // Шаг 7 добавляем подгрузку картинок
+  const [isOpen, setIsOpen] = useState(false); //работа модального окна
+  const [selectedImage, setSelectedImage] = useState(null); // выбранное изображение
+  const handleOpenModal = (image) => {
+    setSelectedImage(image);
+    setIsOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsOpen(false);
+    setSelectedImage(null);
+  };
 
   //шаг 3 взаимодействие с бэк эндом, рендер фоток в галерею
   useEffect(() => {
@@ -39,7 +52,15 @@ const App = () => {
   return (
     <div>
       <SearchBar setQuery={setQuery} />
-      <ImageGallery items={photo} />
+      {isOpen && (
+        <ImageModal onClose={handleCloseModal}>
+          <img
+            src={selectedImage.urls.regular}
+            alt={selectedImage.alt_description}
+          />
+        </ImageModal>
+      )}
+      <ImageGallery items={photo} onImageClick={handleOpenModal} />
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
       <LoadMoreBtn onClick={() => setPage((prev) => prev + 1)} />
