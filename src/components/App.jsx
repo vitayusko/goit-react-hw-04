@@ -4,21 +4,21 @@ import ImageGallery from "./ImageGallery/ImageGallery";
 import { fetchImages } from "../services/api";
 import "../index.css";
 import Loader from "./Loader/Loader";
-import { ErrorMessage } from "formik";
+import ErrorMessage from "./ErrorMessage/ErrorMessage";
 import LoadMoreBtn from "./LoadMoreBtn/LoadMoreBtn";
 import ImageModal from "./ImageModal/ImageModal";
-import ImageCard from "./ImageGallery/ImageCard";
 
 // Импорт функции fetchImages взаимодействие с бэк эндом
 
 const App = () => {
   const [photo, setPhoto] = useState([]);
-  const [query, setQuery] = useState("nature"); //для обработки запроса в серч баре
-  const [isLoading, setIsLoading] = useState(false); //ШФГ5 загрузка
-  const [isError, setIsError] = useState(false); //ШФГ6 ошибки
-  const [page, setPage] = useState(1); // Шаг 7 добавляем подгрузку картинок
-  const [isOpen, setIsOpen] = useState(false); //работа модального окна
-  const [selectedImage, setSelectedImage] = useState(null); // выбранное изображение
+  const [query, setQuery] = useState("nature"); // Для обработки запроса в серч баре
+  const [isLoading, setIsLoading] = useState(false); // Загрузка
+  const [isError, setIsError] = useState(false); // Ошибки
+  const [page, setPage] = useState(1); // Подгрузка картинок
+  const [isOpen, setIsOpen] = useState(false); // Работа модального окна
+  const [selectedImage, setSelectedImage] = useState(null); // Выбранное изображение
+
   const handleOpenModal = (image) => {
     setSelectedImage(image);
     setIsOpen(true);
@@ -29,14 +29,14 @@ const App = () => {
     setSelectedImage(null);
   };
 
-  //шаг 3 взаимодействие с бэк эндом, рендер фоток в галерею
+  // Взаимодействие с бэк эндом, рендер фоток в галерею
   useEffect(() => {
     const getData = async () => {
       try {
-        setIsLoading(true); //идет загрузка
+        setIsLoading(true); // Идет загрузка
         setIsError(false);
         const response = await fetchImages(query, 9, page); // Заменить "nature" на любой другой запрос
-        setIsLoading(false); //отменяем загрузку после того как вывели изображение
+        setIsLoading(false); // Отменяем загрузку после того как вывели изображение
 
         setPhoto((prev) => [...prev, ...response.results]); // Измените на response.results, если API Unsplash возвращает данные в таком формате
       } catch (error) {
@@ -47,18 +47,18 @@ const App = () => {
       }
     };
     getData();
-  }, [query, page]); //  пустой массив зависимостей, чтобы useEffect выполнялся один раз
+  }, [query, page]); // Запускается при изменении query или page
 
   return (
     <div>
       <SearchBar setQuery={setQuery} />
-      {isOpen && (
-        <ImageModal onClose={handleCloseModal}>
-          <img
-            src={selectedImage.urls.regular}
-            alt={selectedImage.alt_description}
-          />
-        </ImageModal>
+      {isOpen && selectedImage && (
+        <ImageModal
+          isOpen={isOpen}
+          onClose={handleCloseModal}
+          imageUrl={selectedImage.urls.regular}
+          altText={selectedImage.alt_description}
+        />
       )}
       <ImageGallery items={photo} onImageClick={handleOpenModal} />
       {isLoading && <Loader />}

@@ -1,17 +1,21 @@
 import React from "react";
+import Modal from "react-modal";
 import s from "./ImageModal.module.css";
 
-const ImageModal = ({ children, onClose }) => {
-  const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+Modal.setAppElement("#root");
 
+const ImageModal = ({ isOpen, onClose, imageUrl, altText }) => {
   return (
-    <div className={s.wrapper} onClick={handleBackdropClick}>
-      <div className={s.modal}>{children}</div>
-    </div>
+    <Modal
+      isOpen={isOpen}
+      onRequestClose={onClose}
+      className={s.modal}
+      overlayClassName={s.overlay}
+      shouldCloseOnOverlayClick={true}
+      closeTimeoutMS={300}
+    >
+      <img src={imageUrl} alt={altText} className={s.image} />
+    </Modal>
   );
 };
 
