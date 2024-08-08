@@ -8,16 +8,14 @@ import ErrorMessage from "./ErrorMessage/ErrorMessage";
 import LoadMoreBtn from "./LoadMoreBtn/LoadMoreBtn";
 import ImageModal from "./ImageModal/ImageModal";
 
-// Импорт функции fetchImages взаимодействие с бэк эндом
-
 const App = () => {
-  const [photo, setPhoto] = useState([]);
-  const [query, setQuery] = useState("nature"); // Для обработки запроса в серч баре
-  const [isLoading, setIsLoading] = useState(false); // Загрузка
-  const [isError, setIsError] = useState(false); // Ошибки
-  const [page, setPage] = useState(1); // Подгрузка картинок
-  const [isOpen, setIsOpen] = useState(false); // Работа модального окна
-  const [selectedImage, setSelectedImage] = useState(null); // Выбранное изображение
+  const [photos, setPhotos] = useState([]); // Масив зображень
+  const [query, setQuery] = useState(""); // Для обробки запиту в пошуковому рядку
+  const [isLoading, setIsLoading] = useState(false); // Індикатор завантаження
+  const [isError, setIsError] = useState(false); // Індикатор помилки
+  const [page, setPage] = useState(1); // Номер сторінки для підвантаження зображень
+  const [isOpen, setIsOpen] = useState(false); // Відкриття/закриття модального вікна
+  const [selectedImage, setSelectedImage] = useState(null); // Вибране зображення
 
   const handleOpenModal = (image) => {
     setSelectedImage(image);
@@ -29,29 +27,37 @@ const App = () => {
     setSelectedImage(null);
   };
 
-  // Взаимодействие с бэк эндом, рендер фоток в галерею
+  // Обробка пошуку при сабміті форми
+  const handleSearchSubmit = (searchQuery) => {
+    setQuery(searchQuery); // Оновлюємо запит
+    setPhotos([]); // Очищуємо масив зображень перед новим пошуком
+    setPage(1); // Повертаємось на першу сторінку
+  };
+
+  // Взаємодія з бекендом та рендеринг фотографій в галерею
   useEffect(() => {
     const getData = async () => {
       try {
-        setIsLoading(true); // Идет загрузка
-        setIsError(false);
-        const response = await fetchImages(query, 9, page); // Заменить "nature" на любой другой запрос
-        setIsLoading(false); // Отменяем загрузку после того как вывели изображение
+        setIsLoading(true); // Включаємо індикатор завантаження
+        setIsError(false); // Скидаємо індикатор помилки
+        const response = await fetchImages(query, 9, page); // Виклик функції для отримання зображень
+        setIsLoading(false); // Вимикаємо індикатор завантаження
 
-        setPhoto((prev) => [...prev, ...response.results]); // Измените на response.results, если API Unsplash возвращает данные в таком формате
+        setPhotos((prev) => [...prev, ...response.results]); // Додаємо нові зображення до попередніх
       } catch (error) {
         console.log(error);
-        setIsError(true);
+        setIsError(true); // Встановлюємо індикатор помилки у випадку помилки
       } finally {
         setIsLoading(false);
       }
     };
-    getData();
-  }, [query, page]); // Запускается при изменении query или page
+    if (query) getData(); // Виконуємо запит, якщо є значення запиту
+  }, [query, page]); // Виконуємо при зміні query або page
 
   return (
     <div>
-      <SearchBar setQuery={setQuery} />
+      <SearchBar setQuery={handleSearchSubmit} />
+      {/* Передача функції обробки сабміту */}
       {isOpen && selectedImage && (
         <ImageModal
           isOpen={isOpen}
@@ -60,7 +66,7 @@ const App = () => {
           altText={selectedImage.alt_description}
         />
       )}
-      <ImageGallery items={photo} onImageClick={handleOpenModal} />
+      <ImageGallery items={photos} onImageClick={handleOpenModal} />
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
       <LoadMoreBtn onClick={() => setPage((prev) => prev + 1)} />
